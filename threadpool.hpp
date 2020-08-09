@@ -47,12 +47,31 @@ public:
     }
 
     template<typename Fn, typename... Args>
-    decltype(auto) enqueue(bool block_on_shutdown, Fn && fn, Args &&... args) {
+    [[nodiscard]] decltype(auto) enqueue(Fn && fn, Args &&... args) {
+        return enqueue0(false, fn, args...);
+    }
+
+    template<typename Fn, typename... Args>
+    [[nodiscard]] decltype(auto) enqueue_r(Fn && fn, Args &&... args) {
+        return enqueue0(true, fn, args...);
+    }
+
+    /**
+     * Fire and forget version of enqueue(Fn &&, Args &&...);
+     */
+    template<typename Fn, typename... Args>
+    void enqueue_discard(Fn && fn, Args &&... args) {
+        (void) enqueue0(true, fn, args...);
+    }
+
+private:
+    template<typename Fn, typename... Args>
+    decltype(auto) enqueue0(bool block_on_shutdown, Fn && fn, Args &&... args) {
         using return_type = std::invoke_result_t<Fn, Args...>;
         using pack_task = std::packaged_task<return_type()>;
 
         auto t = std::make_shared<pack_task>(
-            std::bind(std::forward<Fn>(fn), std::forward<Args>(args)...)
+                std::bind(std::forward<Fn>(fn), std::forward<Args>(args)...)
         );
         auto future = t->get_future();
 
@@ -68,15 +87,6 @@ public:
         return future;
     }
 
-    /**
-     * Fire and forget version of enqueue(bool, Fn &&, Args &&...);
-     */
-    template<typename Fn, typename... Args>
-    void enqueue(Fn && fn, Args &&... args) {
-        (void) enqueue(true, fn, args...);
-    }
-
-private:
     using task = std::pair<std::function<void()>, bool>;
 
     inline task task_dequeue() noexcept {
