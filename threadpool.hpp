@@ -49,23 +49,31 @@ public:
     template<typename Fn, typename... Args>
     decltype(auto) enqueue(bool block_on_shutdown, Fn && fn, Args &&... args) {
         using return_type = std::invoke_result_t<Fn, Args...>;
+        using pack_task = std::packaged_task<return_type()>;
 
-        auto t1 = std::packaged_task<return_type()>(
+        auto t = std::make_shared<pack_task>(
             std::bind(std::forward<Fn>(fn), std::forward<Args>(args)...)
         );
-        auto future = t1.get_future();
-        auto t2 = std::make_pair(std::move(t1), block_on_shutdown);
+        auto future = t->get_future();
 
         {
             std::lock_guard<decltype(mtx)> lock(mtx);
             if (!alive) {
                 throw std::runtime_error("enqueue on stopped thread pool");
             }
-            tasks.push(std::move(t2));
+            tasks.emplace([t = std::move(t)] { (*t)(); }, block_on_shutdown);
         }
 
         cv.notify_one();
         return future;
+    }
+
+    /**
+     * Fire and forget version of enqueue(bool, Fn &&, Args &&...);
+     */
+    template<typename Fn, typename... Args>
+    void enqueue(Fn && fn, Args &&... args) {
+        (void) enqueue(true, fn, args...);
     }
 
 private:

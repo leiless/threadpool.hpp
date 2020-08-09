@@ -12,3 +12,13 @@ add_executable(
         threadpool.hpp
         test.cpp
 )
+
+# see: https://stackoverflow.com/questions/1620918/cmake-and-libpthread
+find_package(Threads REQUIRED)
+if (THREADS_HAVE_PTHREAD_ARG)
+    target_compile_options(${PROJECT_NAME} PUBLIC "-pthread")
+endif()
+if (CMAKE_THREAD_LIBS_INIT)
+    target_link_libraries(${PROJECT_NAME} "${CMAKE_THREAD_LIBS_INIT}")
+endif()
+
