@@ -23,7 +23,7 @@ NAMESPACE_BEGIN(concurrent)
 
 class threadpool {
 public:
-    explicit threadpool(size_t threads) :alive(true) {
+    explicit threadpool(size_t threads) : alive(true) {
         if (threads == 0) {
             throw std::runtime_error("thread pool size cannot be zero");
         }
@@ -57,16 +57,21 @@ public:
     }
 
     /**
-     * Fire and forget version of enqueue(Fn &&, Args &&...);
+     * Fire and forget version of enqueue()
      */
     template<typename Fn, typename... Args>
     void enqueue_discard(Fn && fn, Args &&... args) {
+        (void) enqueue0(false, fn, args...);
+    }
+
+    template<typename Fn, typename... Args>
+    void enqueue_discard_r(Fn && fn, Args &&... args) {
         (void) enqueue0(true, fn, args...);
     }
 
 private:
     template<typename Fn, typename... Args>
-    decltype(auto) enqueue0(bool block_on_shutdown, Fn && fn, Args &&... args) {
+    [[nodiscard]] decltype(auto) enqueue0(bool block_on_shutdown, Fn && fn, Args &&... args) {
         using return_type = std::invoke_result_t<Fn, Args...>;
         using pack_task = std::packaged_task<return_type()>;
 
@@ -89,7 +94,7 @@ private:
 
     using task = std::pair<std::function<void()>, bool>;
 
-    inline task task_dequeue() noexcept {
+    [[nodiscard]] inline task poll_task() noexcept {
         task t;
 
         std::unique_lock<decltype(mtx)> lock(mtx);
@@ -111,7 +116,7 @@ private:
 
     void worker_main() {
         while (true) {
-            task t = task_dequeue();
+            task t = poll_task();
             // The thread pool is going to shutdown
             if (t.first == nullptr) break;
             t.first();
