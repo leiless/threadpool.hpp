@@ -27,6 +27,7 @@ public:
         if (threads == 0) {
             throw std::runtime_error("thread pool size cannot be zero");
         }
+
         for (auto i = 0llu; i < threads; i++) {
             workers.emplace_back([this] { worker_main(); });
         }
@@ -34,10 +35,12 @@ public:
 
     ~threadpool() noexcept {
         {
-            std::unique_lock<decltype(mtx)> lock(mtx);
+            std::lock_guard<decltype(mtx)> lock(mtx);
             alive = false;
         }
+
         cv.notify_all();
+
         for (auto & worker : workers) {
             worker.join();
         }
