@@ -33,6 +33,10 @@ public:
         }
     }
 
+    // see: https://stackoverflow.com/a/23771245/13600780
+    threadpool(const threadpool &) = delete;
+    threadpool & operator=(const threadpool &) = delete;
+
     ~threadpool() noexcept {
         {
             std::lock_guard<decltype(mtx)> lock(mtx);

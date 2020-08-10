@@ -15,6 +15,14 @@ int main() {
 
     tp.enqueue_discard([]() { throw std::runtime_error("why this function got called?!"); });
 
+    int x = 0;
+    auto r3 = tp.enqueue([&](){ x = 1; });
+    r3.get();
+    if (x != 1) throw std::runtime_error("why x not equals to 1?!");
+
+    tp.enqueue_discard_r([=]() mutable { x = 2; });
+    if (x != 1) throw std::runtime_error("why x not equals to 1?!");
+
     return 0;
 }
 
