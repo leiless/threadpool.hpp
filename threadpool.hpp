@@ -1,5 +1,5 @@
 /*
- * Trivial header-only thread pool implementation in modern C++.
+ * Simple header-only thread pool implementation in modern C++.
  *
  * Created:     Aug 9, 2020.
  * Repository:  https://github.com/leiless/threadpool.hpp
@@ -51,31 +51,18 @@ public:
     }
 
     template<typename Fn, typename... Args>
-    [[nodiscard]] decltype(auto) enqueue(Fn && fn, Args &&... args) {
-        return enqueue0(false, fn, args...);
+    decltype(auto) enqueue(Fn && fn, Args &&... args) {
+        return enqueue(false, fn, args...);
     }
 
     template<typename Fn, typename... Args>
-    [[nodiscard]] decltype(auto) enqueue_r(Fn && fn, Args &&... args) {
-        return enqueue0(true, fn, args...);
-    }
-
-    /**
-     * Fire and forget version of enqueue()
-     */
-    template<typename Fn, typename... Args>
-    void enqueue_discard(Fn && fn, Args &&... args) {
-        (void) enqueue0(false, fn, args...);
-    }
-
-    template<typename Fn, typename... Args>
-    void enqueue_discard_r(Fn && fn, Args &&... args) {
-        (void) enqueue0(true, fn, args...);
+    decltype(auto) enqueue_r(Fn && fn, Args &&... args) {
+        return enqueue(true, fn, args...);
     }
 
 private:
     template<typename Fn, typename... Args>
-    [[nodiscard]] decltype(auto) enqueue0(bool block_on_shutdown, Fn && fn, Args &&... args) {
+    decltype(auto) enqueue(bool block_on_shutdown, Fn && fn, Args &&... args) {
         using return_type = std::invoke_result_t<Fn, Args...>;
         using pack_task = std::packaged_task<return_type()>;
 
