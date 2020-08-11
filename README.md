@@ -11,7 +11,7 @@ No any extra dependency is required, easy to use.
 ```c++
 #include "threadpool.hpp"
 
-constexpr int THREADPOOL_SIZE = 4;
+constexpr int THREADPOOL_SIZE = /* ... */;
 concurrent::threadpool tp(THREADPOOL_SIZE);
 ```
 
@@ -51,7 +51,9 @@ More checkout [`test.cpp`](test.cpp).
 
 This implementation mainly inspired by [progschj/ThreadPool](https://github.com/progschj/ThreadPool) and [Build Your Own Threadpool With C++](https://kingsamchen.github.io/2018/05/30/build-your-own-thread-pool-with-cpp/).
 
+[Add a new branch for C++ 17. #40](https://github.com/progschj/ThreadPool/issues/40) is also very helpful.
+
 ## License
 
-see [LICENSE](LICENSE).
+Released under BSD-2-Clause, more see [LICENSE](LICENSE).
 
