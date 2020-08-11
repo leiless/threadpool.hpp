@@ -29,7 +29,7 @@ template<typename Fn, typename... Args>
 decltype(auto) enqueue_r(Fn && fn, Args &&... args);
 ```
 
-Same as `enqueue()`, yet the task will still be executed even if the thread pool is shutting down instead of simply discarded.
+Same as `enqueue()`, yet the task will still be executed even if the thread pool is shutting down.
 
 ## Example
 
@@ -50,4 +50,8 @@ More checkout [`test.cpp`](test.cpp).
 ## Courtesy
 
 This implementation mainly inspired by [progschj/ThreadPool](https://github.com/progschj/ThreadPool) and [Build Your Own Threadpool With C++](https://kingsamchen.github.io/2018/05/30/build-your-own-thread-pool-with-cpp/).
+
+## License
+
+see [LICENSE](LICENSE).
 
