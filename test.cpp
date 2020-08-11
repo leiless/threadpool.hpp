@@ -3,7 +3,8 @@
 #include "threadpool.hpp"
 
 int main() {
-    concurrent::threadpool tp(4);
+    constexpr int THREADPOOL_SIZE = 4;
+    concurrent::threadpool tp(THREADPOOL_SIZE);
 
     (void) tp.enqueue_r([]() { std::cout << "hello world!" << std::endl; });
 
